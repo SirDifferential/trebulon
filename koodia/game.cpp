@@ -1,7 +1,7 @@
 #include "game.hpp"
 #include "world.hpp"
 #include "textRenderer.hpp"
-
+#include "datastorage.hpp"
 Game game;
 
 Game::Game()
@@ -9,6 +9,7 @@ Game::Game()
     resolution_x = 800;
     resolution_y = 640;
     stop_running = false;
+    dataStorage = std::shared_ptr<DataStorage>(new DataStorage());
 }
 
 Game::~Game()
@@ -77,8 +78,13 @@ void Game::start()
         //game_music->play();
         mainWindow->clear();
     }
+
+    fprintf(stderr, "# Game: Loading content\n");
+    dataStorage->loadData();
+
     fprintf(stderr, "# Game: Creating world\n");
     world = std::shared_ptr<World>(new World());
+    mainWindow->clear();
     getTextRenderer()->renderText(20, 20, "Creating world\nplease wait warmly", FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);
     forceRedraw();
     world->createWorld(0, 16, 0, 16, 512, 512);
@@ -133,4 +139,9 @@ std::shared_ptr<sf::RenderWindow> Game::getRenderWindow()
 std::shared_ptr<TextRenderer> Game::getTextRenderer()
 {
     return textRenderer;
+}
+
+std::shared_ptr<DataStorage> Game::getDataStorage()
+{
+    return dataStorage;
 }
