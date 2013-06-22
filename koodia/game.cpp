@@ -3,6 +3,8 @@
 #include "textRenderer.hpp"
 #include "datastorage.hpp"
 #include "player.hpp"
+#include "toolbox.hpp"
+
 Game game;
 
 Game::Game()
@@ -11,6 +13,7 @@ Game::Game()
     resolution_y = 640;
     stop_running = false;
     dataStorage = std::shared_ptr<DataStorage>(new DataStorage());
+    toolbox = std::shared_ptr<Toolbox>(new Toolbox());
 }
 
 Game::~Game()
@@ -198,4 +201,9 @@ std::shared_ptr<TextRenderer> Game::getTextRenderer()
 std::shared_ptr<DataStorage> Game::getDataStorage()
 {
     return dataStorage;
+}
+
+std::shared_ptr<Toolbox> Game::getToolbox()
+{
+    return toolbox;
 }
