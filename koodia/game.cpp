@@ -44,8 +44,52 @@ void Game::checkEvents()
                     case sf::Keyboard::Escape:
                         exit();
                         break;
+                    case sf::Keyboard::T:
+                        // stuff here
+                        break;
+                    case sf::Keyboard::Num1:
+                        player->setDesiredSpeed(1);
+                        break;
+                    case sf::Keyboard::Num2:
+                        player->setDesiredSpeed(2);
+                        break;
+                    case sf::Keyboard::Num3:
+                        player->setDesiredSpeed(3);
+                        break;
+                    case sf::Keyboard::Num4:
+                        player->setDesiredSpeed(4);
+                        break;
+                    case sf::Keyboard::Num5:
+                        player->setDesiredSpeed(5);
+                        break;
+                    case sf::Keyboard::Num6:
+                        player->setDesiredSpeed(6);
+                        break;
+                    case sf::Keyboard::Num7:
+                        player->setDesiredSpeed(7);
+                        break;
+                    case sf::Keyboard::Num8:
+                        player->setDesiredSpeed(8);
+                        break;
+                    case sf::Keyboard::Num9:
+                        player->setDesiredSpeed(9);
+                        break;
+                    case sf::Keyboard::Num0:
+                        player->setDesiredSpeed(0);
+                        break;
+                    break;
                 }
-            break;
+                break;
+        }
+
+        // Events for keys that are held down
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+        {
+            player->rotateLeft();
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+        {
+            player->rotateRight();
         }
     }
 }
@@ -61,7 +105,7 @@ void Game::start()
     fprintf(stderr, "# Game: Starting up\n");
     fprintf(stderr, "# Game: Creating window\n");
     mainWindow = std::shared_ptr<sf::RenderWindow>(new sf::RenderWindow());
-    mainWindow->create(sf::VideoMode(resolution_x, resolution_y), "Water miners of X");
+    mainWindow->create(sf::VideoMode(resolution_x, resolution_y), "Water miners of Trebulon");
     mainWindow->setFramerateLimit(60);
     fprintf(stderr, "# Game: Initial window display\n");
     mainWindow->display();
@@ -102,6 +146,11 @@ void Game::renderAll()
     player->render();
 }
 
+void Game::updateAll()
+{
+    player->update();
+}
+
 /**
 * Draws the main window right here and now
 * Used during loading the game
@@ -128,6 +177,7 @@ int Game::mainloop()
             fprintf(stderr, "%d\n", fps);
         }
         checkEvents();
+        updateAll();
         mainWindow->clear();
         renderAll();
         mainWindow->display();

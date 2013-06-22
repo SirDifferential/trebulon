@@ -30,6 +30,7 @@ public:
     ~Game();
     void start();
     int mainloop();
+    void updateAll();
     void renderAll();
     void checkEvents();
     void exit();
