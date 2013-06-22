@@ -1,5 +1,7 @@
 #include "game.hpp"
 #include "world.hpp"
+#include "textRenderer.hpp"
+
 Game game;
 
 Game::Game()
@@ -54,18 +56,49 @@ void Game::exit()
 
 void Game::start()
 {
+    fprintf(stderr, "# Game: Starting up\n");
+    fprintf(stderr, "# Game: Creating window\n");
     mainWindow = std::shared_ptr<sf::RenderWindow>(new sf::RenderWindow());
     mainWindow->create(sf::VideoMode(resolution_x, resolution_y), "jokunimitähän");
     mainWindow->setFramerateLimit(60);
+    fprintf(stderr, "# Game: Initial window display\n");
     mainWindow->display();
-
+    textRenderer = std::shared_ptr<TextRenderer>(new TextRenderer());
+    game.getTextRenderer()->renderText(20, 20, "Loading data", FONT_SIZE::LARGE_FONT, true, sf::Color::Cyan);
+    game_music = std::shared_ptr<sf::Music>(new sf::Music());
+    // TODO: Use actual properly licensed music :/
+    if (!game_music->openFromFile("data/music/song_game.ogg"))
+    {
+        fprintf(stderr, "! Game: Error loading music\n");
+    }
+    else
+    {
+        game_music->setLoop(true);
+        //game_music->play();
+        mainWindow->clear();
+    }
+    fprintf(stderr, "# Game: Creating world\n");
     world = std::shared_ptr<World>(new World());
-    world->createWorld();
+    getTextRenderer()->renderText(20, 20, "Creating world\nplease wait warmly", FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);
+    forceRedraw();
+    world->createWorld(0, 16, 0, 16, 512, 512);
+    world->createWorld(16, 32, 0, 16, 512, 512);
+    world->createWorld(0, 16, 16, 32, 512, 512);
+    world->createWorld(16, 32, 16, 32, 512, 512);
 }
 
 void Game::renderAll()
 {
     world->render();
+}
+
+/**
+* Draws the main window right here and now
+* Used during loading the game
+*/
+void Game::forceRedraw()
+{
+    mainWindow->display();
 }
 
 int Game::mainloop()
@@ -85,6 +118,7 @@ int Game::mainloop()
             fprintf(stderr, "%d\n", fps);
         }
         checkEvents();
+        mainWindow->clear();
         renderAll();
         mainWindow->display();
     }
@@ -94,4 +128,9 @@ int Game::mainloop()
 std::shared_ptr<sf::RenderWindow> Game::getRenderWindow()
 {
     return mainWindow;
+}
+
+std::shared_ptr<TextRenderer> Game::getTextRenderer()
+{
+    return textRenderer;
 }

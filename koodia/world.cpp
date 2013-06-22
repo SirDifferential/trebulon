@@ -1,5 +1,6 @@
 #include "world.hpp"
 #include "game.hpp"
+#include "textRenderer.hpp"
 #include <noise/noise.h>
 #include "noiseutils.h"
 
@@ -7,47 +8,32 @@ using namespace noise;
 
 World::World()
 {
-    worldMap = nullptr;
 }
 
 World::~World()
 {
 }
 
-void World::createWorld()
+void World::createWorldRegion(int x_start, int x_end, int y_start, int y_end, int size_x, int size_y)
 {
-    module::RidgedMulti mountainTerrain;
+}
 
-    module::Billow baseFlatTerrain;
-    baseFlatTerrain.SetFrequency (2.0);
+void World::createWorld(int x_start, int x_end, int y_start, int y_end, int size_x, int size_y)
+{
 
-    module::ScaleBias flatTerrain;
-    flatTerrain.SetSourceModule (0, baseFlatTerrain);
-    flatTerrain.SetScale (0.125);
-    flatTerrain.SetBias (-0.75);
+    std::pair<int,int> tempPair;
+    tempPair.first = x_start;   // TODO: Verify
+    tempPair.second = y_start;
 
-    module::Perlin terrainType;
-    terrainType.SetFrequency (0.5);
-    terrainType.SetPersistence (0.25);
+    // Generate many areas using threads
 
-    module::Select terrainSelector;
-    terrainSelector.SetSourceModule (0, flatTerrain);
-    terrainSelector.SetSourceModule (1, mountainTerrain);
-    terrainSelector.SetControlModule (terrainType);
-    terrainSelector.SetBounds (0.0, 1000.0);
-    terrainSelector.SetEdgeFalloff (0.125);
-
-    module::Turbulence finalTerrain;
-    finalTerrain.SetSourceModule (0, terrainSelector);
-    finalTerrain.SetFrequency (4.0);
-    finalTerrain.SetPower (0.125);
-
+    module::Perlin myModule;
     utils::NoiseMap heightMap;
     utils::NoiseMapBuilderPlane heightMapBuilder;
-    heightMapBuilder.SetSourceModule (finalTerrain);
+    heightMapBuilder.SetSourceModule (myModule);
     heightMapBuilder.SetDestNoiseMap (heightMap);
-    heightMapBuilder.SetDestSize (256, 256);
-    heightMapBuilder.SetBounds (6.0, 10.0, 1.0, 5.0);
+    heightMapBuilder.SetDestSize (size_x, size_y);
+    heightMapBuilder.SetBounds (x_start, x_end, y_start, y_end);
     heightMapBuilder.Build ();
 
     utils::RendererImage renderer;
@@ -63,28 +49,38 @@ void World::createWorld()
     renderer.SetLightContrast (3.0);
     renderer.SetLightBrightness (2.0);
     renderer.Render ();
+    
+    std::shared_ptr<sf::Sprite> tempSprite(new sf::Sprite());
+    std::shared_ptr<sf::Texture> tempTexture(new sf::Texture());
+    std::shared_ptr<sf::Image> tempImage = std::shared_ptr<sf::Image>(new sf::Image());
+    tempImage->create(image.GetWidth(), image.GetHeight());
 
-    worldMapData = std::shared_ptr<sf::Texture>(new sf::Texture());
-    worldMapData->create(image.GetWidth(), image.GetHeight());
-    sf::Image tempData;
-    tempData.create(image.GetWidth(), image.GetHeight());
     utils::Color c;
 
+    fprintf(stderr, "# World: Copying world data to sf::sprite\n");
     for (int i = 0; i < image.GetWidth(); i++)
     {
         for (int j = 0; j < image.GetHeight(); j++)
         {
             c = image.GetValue(i,j);
-            tempData.setPixel(i, j, sf::Color(c.red, c.green, c.red, c.alpha));
+            tempImage->setPixel(i, j, sf::Color(c.red, c.green, c.red, c.alpha));
         }
     }
 
-    worldMapData->update(tempData);
-    worldMap = std::shared_ptr<sf::Sprite>(new sf::Sprite());
-    worldMap->setTexture((*worldMapData));
+    tempTexture->create(size_x, size_y);
+    tempTexture->update((*tempImage));
+    worldMapData[tempPair] = tempTexture;
+    tempSprite->setTexture((*tempTexture));
+    tempSprite->setPosition(x_start*32, y_start*32);
+    worldMap[tempPair] = tempSprite;
+    activeMapRegions.push_back(worldMap[tempPair]);
+    fprintf(stderr, "# World: creation finished\n");
 }
 
 void World::render()
 {
-    game.getRenderWindow()->draw((*worldMap));
+    for (auto iter = activeMapRegions.begin(); iter != activeMapRegions.end(); iter++)
+    {
+        game.getRenderWindow()->draw((*iter->get()));
+    }
 }
