@@ -10,6 +10,7 @@
 class World;
 class TextRenderer;
 class DataStorage;
+class Player;
 
 class Game
 {
@@ -17,6 +18,7 @@ private:
     std::shared_ptr<sf::RenderWindow> mainWindow;
     std::shared_ptr<TextRenderer> textRenderer;
     std::shared_ptr<DataStorage> dataStorage;
+    std::shared_ptr<Player> player;
     
     int resolution_x;
     int resolution_y;
@@ -37,6 +39,7 @@ public:
     std::shared_ptr<sf::RenderWindow> getRenderWindow();
     std::shared_ptr<TextRenderer> getTextRenderer();
     std::shared_ptr<DataStorage> getDataStorage();
+    std::shared_ptr<Player> getPlayer();
 };
 
 extern Game game;

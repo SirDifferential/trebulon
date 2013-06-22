@@ -1,7 +1,7 @@
 #include "datastorage.hpp"
 #include "game.hpp"
 #include "textRenderer.hpp"
-
+#include <algorithm>
 DataStorage::DataStorage()
 {
     fprintf(stderr, "# DataStorage: Constructing\n");
@@ -22,7 +22,7 @@ void DataStorage::loadData()
     game.getTextRenderer()->renderText(20, 20, "Loading music", FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);
     game.forceRedraw();
     
-    loadMusic(1, "data/music/game_song.ogg");
+    loadMusic(1, "data/music/song_game.ogg");
 }
 
 /**
@@ -51,16 +51,34 @@ int DataStorage::loadMusic(int id, std::string path)
         fprintf(stderr, "! DataStorage: Failed to load music %s\n", path.c_str());
         return 1;
     }
+    musicMap[id] = music;
     return 0;
 }
 
+/**
+* Returns an existing image from the imageMap, or NULL if not found
+*/
 std::shared_ptr<sf::Texture> DataStorage::getTexture(std::string name)
 {
-    return nullptr;
+    std::map<std::string ,std::shared_ptr<sf::Texture> >::iterator it;
+    it = textureMap.find(name);
+    if (it == textureMap.end())
+    {
+        fprintf(stderr, "! DataStorage: Image not found: %s\n", name.c_str());
+        return nullptr;
+    }
+    return it->second;
 }
 
 std::shared_ptr<sf::Music> DataStorage::getMusic(int id)
 {
-    return nullptr;
+    std::map<int ,std::shared_ptr<sf::Music> >::iterator it;
+    it = musicMap.find(id);
+    if (it == musicMap.end())
+    {
+        fprintf(stderr, "! DataStorage: Music not found: %d\n", id);
+        return nullptr;
+    }
+    return it->second;
 }
 

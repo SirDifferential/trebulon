@@ -12,7 +12,7 @@ class DataStorage
 {
 private:
     std::map<std::string, std::shared_ptr<sf::Texture>> textureMap;
-    std::vector<std::shared_ptr<sf::Music>> musicVector;
+    std::map<int, std::shared_ptr<sf::Music>> musicMap;
 public:
     DataStorage();
     ~DataStorage();
