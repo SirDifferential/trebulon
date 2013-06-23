@@ -11,8 +11,14 @@ class Probe
 private:
     sf::Vector2f position;
     std::shared_ptr<sf::Sprite> sprite;
+    std::shared_ptr<sf::Sprite> burrowedSprite;
     float radius;
     std::shared_ptr<Water> water;
+    long installTime;
+    long spriteChangeTime;
+    float scale;
+    float scalePerTick;
+
 public:
     Probe(sf::Vector2f coords);
     ~Probe();

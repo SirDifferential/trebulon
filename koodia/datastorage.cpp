@@ -22,6 +22,7 @@ void DataStorage::loadData()
     loadTexture("drill", "data/gfx/drill.png");
     loadTexture("drill_active", "data/gfx/drill_active.png");
     loadTexture("probe", "data/gfx/probe.png");
+    loadTexture("probe_burrowed", "data/gfx/probe_burrowed.png");
     loadTexture("station", "data/gfx/station.png");
     loadTexture("UI", "data/gfx/UI.png");
     std::shared_ptr<sf::Sprite> drillImage = std::shared_ptr<sf::Sprite>(new sf::Sprite());
@@ -35,6 +36,10 @@ void DataStorage::loadData()
     std::shared_ptr<sf::Sprite> probeImage = std::shared_ptr<sf::Sprite>(new sf::Sprite());
     probeImage->setTexture((*getTexture("probe")));
     spriteMap["probe"] = probeImage;
+
+    std::shared_ptr<sf::Sprite> probe_burrowed = std::shared_ptr<sf::Sprite>(new sf::Sprite());
+    probe_burrowed->setTexture((*getTexture("probe_burrowed")));
+    spriteMap["probe_burrowed"] = probe_burrowed;
 
     std::shared_ptr<sf::Sprite> stationImage = std::shared_ptr<sf::Sprite>(new sf::Sprite());
     stationImage->setTexture((*getTexture("station")));
