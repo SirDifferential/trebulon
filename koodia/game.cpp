@@ -257,3 +257,8 @@ std::shared_ptr<Player> Game::getPlayer()
 {
     return player;
 }
+
+std::shared_ptr<World> Game::getWorld()
+{
+    return world;
+}

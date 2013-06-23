@@ -32,7 +32,7 @@ World::~World()
 * Takes the world creation sprite and its data (texture) as params,
 * as well as the coordinates where it shoudl exist
 */
-void storeWorldCreationResult(World* w, std::shared_ptr<sf::Sprite> sprite, std::shared_ptr<sf::Texture> texture, std::pair<int,int> coords)
+void storeWorldCreationResult(std::shared_ptr<World> w, std::shared_ptr<sf::Sprite> sprite, std::shared_ptr<sf::Texture> texture, std::pair<int,int> coords)
 {
     dataMutex.lock();
     w->worldMapData[coords] = texture;
@@ -41,7 +41,7 @@ void storeWorldCreationResult(World* w, std::shared_ptr<sf::Sprite> sprite, std:
     dataMutex.unlock();
 }
 
-void createWorldRegion(World* world, std::vector<int>& params)
+void createWorldRegion(std::shared_ptr<World> world, std::vector<int>& params)
 {
     if (params.size() < 4)
     {
@@ -109,7 +109,7 @@ void createWorldRegion(World* world, std::vector<int>& params)
     tempTexture->update((*tempImage));
     //world->worldMapData[tempPair] = tempTexture;
     tempSprite->setTexture((*tempTexture));
-    tempSprite->setPosition(x_start*32, y_start*32);
+    tempSprite->setPosition(x_start*NOISE_PER_PIXEL*2, y_start*NOISE_PER_PIXEL*2);
     //world->worldMap[tempPair] = tempSprite;
     //world->activeMapRegions.push_back(world->worldMap[tempPair]);
 
@@ -139,7 +139,7 @@ void World::createWorld()
     std::vector<int>& paramsRef = params;
 
     game.getRenderWindow()->clear();
-    std::string temp = game.getToolbox()->createString("Creating world! Please wait warmly...\nChunks finished: ", 0, " out of ", (INITIAL_AREA*2/NOISE_PER_PIXEL)*(INITIAL_AREA*2/NOISE_PER_PIXEL));
+    std::string temp = game.getToolbox()->createString("Creating world! Please wait warmly...\nChunks finished: ", 0, " out of ", (INITIAL_AREA/NOISE_PER_PIXEL*2)*(INITIAL_AREA/NOISE_PER_PIXEL*2));
     game.getTextRenderer()->renderText(20, 20, temp, FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);
     game.forceRedraw();
 
@@ -153,7 +153,7 @@ void World::createWorld()
             params.at(3) = y + NOISE_PER_PIXEL;
             //params.at(4) = REGION_SIZE;
             //params.at(5) = REGION_SIZE;
-            std::shared_ptr<std::thread> temp = std::shared_ptr<std::thread>(new std::thread(createWorldRegion, this, paramsRef));
+            std::shared_ptr<std::thread> temp = std::shared_ptr<std::thread>(new std::thread(createWorldRegion, game.getWorld(), paramsRef));
             threadContainer.push_back(temp);
             fprintf(stderr, "# World: Created thread number %d\n", threadContainer.size());
         }
@@ -187,9 +187,11 @@ std::shared_ptr<sf::Sprite> World::checkRegionAtCoords(std::pair<int,int> coords
 {
     std::map<std::pair<int,int>, std::shared_ptr<sf::Sprite>>::iterator iter = worldMap.find(coords);
     if (iter != worldMap.end())
-        return (*iter).second;
+        return iter->second;
     else
+    {
         return nullptr;
+    }
 }
 
 void World::update()
@@ -214,7 +216,7 @@ void World::update()
                 params.push_back(searchRegion.first + NOISE_PER_PIXEL);
                 params.push_back(searchRegion.second);
                 params.push_back(searchRegion.second + NOISE_PER_PIXEL);
-                createWorldRegion(this, params);
+                createWorldRegion(game.getWorld(), params);
             }
         }
     }

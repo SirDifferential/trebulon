@@ -46,6 +46,7 @@ public:
     std::shared_ptr<TextRenderer> getTextRenderer();
     std::shared_ptr<DataStorage> getDataStorage();
     std::shared_ptr<Player> getPlayer();
+    std::shared_ptr<World> getWorld();
     std::shared_ptr<Toolbox> getToolbox();
 };
 
