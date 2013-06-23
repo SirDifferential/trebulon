@@ -17,6 +17,8 @@ void DataStorage::loadData()
     game.forceRedraw();
     
     loadTexture("player", "data/gfx/player.png");
+    loadTexture("banner", "data/gfx/banner.png");
+    loadTexture("help", "data/gfx/keys.png");
 
     game.getRenderWindow()->clear();
     game.getTextRenderer()->renderText(20, 20, "Loading music", FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);

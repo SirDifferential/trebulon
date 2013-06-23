@@ -138,8 +138,50 @@ void Game::start()
     
     world->createWorld();
 
+    bannerImage = std::shared_ptr<sf::Sprite>(new sf::Sprite());
+    bannerImage->setTexture((*dataStorage->getTexture("banner")));
+    helpImage = std::shared_ptr<sf::Sprite>(new sf::Sprite());
+    helpImage->setTexture((*dataStorage->getTexture("help")));
+
+    mainWindow->clear();
+    mainWindow->draw((*bannerImage));
+    forceRedraw();
+
     player = std::shared_ptr<Player>(new Player());
     player->setPosition(200,200);
+
+    bool reactionGiven = false;
+
+    while (reactionGiven == false)
+    {
+        sf::Event e;
+        while (mainWindow->pollEvent(e))
+        {
+            switch (e.type)
+            {
+                case sf::Event::Closed:
+                    exit();
+                    break;
+                case sf::Event::KeyPressed:
+                    switch (e.key.code)
+                    {
+                        case sf::Keyboard::F1:
+                            mainWindow->clear();
+                            mainWindow->draw((*helpImage));
+                            forceRedraw();
+                            break;
+                        case sf::Keyboard::Escape:
+                            reactionGiven = true;
+                            exit();
+                            break;
+                        default:
+                            reactionGiven = true;
+                            break;
+                    }
+                    break;
+            }
+        }
+    }
 }
 
 void Game::renderAll()

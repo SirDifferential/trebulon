@@ -28,6 +28,8 @@ private:
     std::shared_ptr<World> world;
     std::shared_ptr<sf::Music> game_music;
     sf::View center_view;
+    std::shared_ptr<sf::Sprite> bannerImage;
+    std::shared_ptr<sf::Sprite> helpImage;
 public:
     Game();
     ~Game();
