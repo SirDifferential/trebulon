@@ -431,7 +431,7 @@ void World::update()
     // See if new areas need to be generated
     std::pair<int,int> playerRegion = game.getPlayer()->getRegion();
     std::pair<int,int> searchRegion = playerRegion;
-    std::vector<int>& params = std::vector<int>();
+    std::vector<int>* params = &std::vector<int>();
 
     for (auto iter = drills.begin(); iter != drills.end(); iter++)
     {

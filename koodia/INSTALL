@@ -1,0 +1,28 @@
+cd $HOME
+
+git clone git@github.com:eXpl0it3r/libnoise.git
+cd libnoise
+mkdir build
+cd build
+cmake ..
+make
+cd ..
+cp -r include /usr/local/include
+cp build/libnoise.a /usr/local/bin
+
+cd $HOME
+
+git clone git@github.com:LaurentGomila/SFML.git
+cd SFML
+mkdir build
+cd build
+cmake ..
+make
+cd ..
+sudo cp lib/* /usr/local/lib
+sudo cp -r include/ /usr/local/include
+
+cd $HOME/bfikoodiskaba/koodia
+make
+./trebulon
+
