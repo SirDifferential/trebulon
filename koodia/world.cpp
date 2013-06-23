@@ -209,6 +209,7 @@ void World::update()
         {
             searchRegion.first = x;
             searchRegion.second = y;
+            params.clear();
             if (checkRegionAtCoords(searchRegion) == nullptr)
             {
                 fprintf(stderr, "No terrain found at %d %d\n", searchRegion.first, searchRegion.second);
