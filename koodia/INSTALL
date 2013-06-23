@@ -8,7 +8,7 @@ cmake ..
 make
 cd ..
 cp -r include /usr/local/
-cp build/libnoise.a /usr/local/bin
+cp build/libnoise.a /usr/local/lib
 
 cd $HOME
 
