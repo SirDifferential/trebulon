@@ -94,3 +94,8 @@ void Player::rotateRight()
     if (facing > 360)
         facing = 0;
 }
+
+sf::Vector2f Player::getPosition()
+{
+    return position;
+}

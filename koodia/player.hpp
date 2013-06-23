@@ -22,6 +22,7 @@ public:
     void render();
     void update();
     void setPosition(int x, int y);
+    sf::Vector2f getPosition();
 
     void setSpeed(float speed);
     void setDesiredSpeed(float speed);

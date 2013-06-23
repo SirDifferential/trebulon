@@ -14,6 +14,7 @@ Game::Game()
     stop_running = false;
     dataStorage = std::shared_ptr<DataStorage>(new DataStorage());
     toolbox = std::shared_ptr<Toolbox>(new Toolbox());
+    center_view.setCenter(sf::Vector2f(400,300));
 }
 
 Game::~Game()
@@ -150,6 +151,8 @@ void Game::renderAll()
 void Game::updateAll()
 {
     player->update();
+    center_view.setCenter(player->getPosition());
+    mainWindow->setView(center_view);
 }
 
 /**

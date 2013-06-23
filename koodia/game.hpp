@@ -27,6 +27,7 @@ private:
     bool stop_running;
     std::shared_ptr<World> world;
     std::shared_ptr<sf::Music> game_music;
+    sf::View center_view;
 public:
     Game();
     ~Game();
