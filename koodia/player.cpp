@@ -42,6 +42,8 @@ void Player::render()
 void Player::update()
 {
     speed = sqrt((velocity.x * velocity.x) + (velocity.y * velocity.y));
+    if (speed < 0.1)
+        speed = 0.0;
     
     if (velocity.x > desiredSpeed)
         velocity.x -= acceleration.x;

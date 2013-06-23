@@ -11,6 +11,7 @@ public:
     ~Toolbox();
 
     std::string createString(std::string s, float i);
+    std::string createString(std::string s1, float num1, std::string s2, float num2);
 };
 
 #endif

@@ -7,16 +7,17 @@
 
 class World
 {
-private:
+public:
     std::map<std::pair<int,int>, std::shared_ptr<sf::Sprite>> worldMap;
     std::map<std::pair<int,int>, std::shared_ptr<sf::Texture>> worldMapData;
     std::vector<std::shared_ptr<sf::Sprite>> activeMapRegions;
-public:
+    int regionCount;
+    std::pair<int,int> currentRegion;
+
     World();
     ~World();
 
-    void createWorld(int x_start, int x_end, int y_start, int y_end, int size_x, int size_y);
-    void createWorldRegion(int x_start, int x_end, int y_start, int y_end, int size_x=1024, int size_y=1024);
+    void createWorld();
     void render();
 };
 

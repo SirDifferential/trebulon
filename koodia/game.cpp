@@ -134,10 +134,8 @@ void Game::start()
     mainWindow->clear();
     getTextRenderer()->renderText(20, 20, "Creating world\nplease wait warmly", FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);
     forceRedraw();
-    world->createWorld(0, 16, 0, 16, 512, 512);
-    world->createWorld(16, 32, 0, 16, 512, 512);
-    world->createWorld(0, 16, 16, 32, 512, 512);
-    world->createWorld(16, 32, 16, 32, 512, 512);
+    
+    world->createWorld();
 
     player = std::shared_ptr<Player>(new Player());
     player->setPosition(200,200);
