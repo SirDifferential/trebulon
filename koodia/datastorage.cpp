@@ -20,14 +20,29 @@ void DataStorage::loadData()
     loadTexture("banner", "data/gfx/banner.png");
     loadTexture("help", "data/gfx/keys.png");
     loadTexture("drill", "data/gfx/drill.png");
+    loadTexture("drill_active", "data/gfx/drill_active.png");
     loadTexture("probe", "data/gfx/probe.png");
+    loadTexture("station", "data/gfx/station.png");
+    loadTexture("UI", "data/gfx/UI.png");
     std::shared_ptr<sf::Sprite> drillImage = std::shared_ptr<sf::Sprite>(new sf::Sprite());
     drillImage->setTexture((*getTexture("drill")));
     spriteMap["drill"] = drillImage;
 
+    std::shared_ptr<sf::Sprite> drillImage2 = std::shared_ptr<sf::Sprite>(new sf::Sprite());
+    drillImage2->setTexture((*getTexture("drill_active")));
+    spriteMap["drill_active"] = drillImage2;
+
     std::shared_ptr<sf::Sprite> probeImage = std::shared_ptr<sf::Sprite>(new sf::Sprite());
     probeImage->setTexture((*getTexture("probe")));
     spriteMap["probe"] = probeImage;
+
+    std::shared_ptr<sf::Sprite> stationImage = std::shared_ptr<sf::Sprite>(new sf::Sprite());
+    stationImage->setTexture((*getTexture("station")));
+    spriteMap["station"] = stationImage;
+
+    std::shared_ptr<sf::Sprite> ui = std::shared_ptr<sf::Sprite>(new sf::Sprite());
+    ui->setTexture((*getTexture("UI")));
+    spriteMap["UI"] = ui;
 
     game.getRenderWindow()->clear();
     game.getTextRenderer()->renderText(20, 20, "Loading music", FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);

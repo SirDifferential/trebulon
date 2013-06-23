@@ -16,11 +16,14 @@ private:
     float desiredSpeed;
     float rotationalSpeed;
     std::pair<int,int> playerRegion;
+    std::shared_ptr<sf::Sprite> ui;
 
     int drillsLeft;
     int probesLeft;
     long objectPlantTime;
     long nextPlantTime;
+    int GUI_render_x;
+    int GUI_render_y;
 public:
     Player();
     ~Player();
@@ -39,6 +42,7 @@ public:
 
     void dropDrill();
     void dropProbe();
+
 };
 
 #endif

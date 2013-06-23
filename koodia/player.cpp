@@ -35,6 +35,9 @@ Player::Player()
     probesLeft = 50;
     objectPlantTime = 0;
     nextPlantTime = 0;
+    ui = game.getDataStorage()->getSprite("UI");
+    GUI_render_x = -480;
+    GUI_render_y = -475;
 }
 
 Player::~Player()
@@ -43,16 +46,31 @@ Player::~Player()
 
 void Player::render()
 {
+    ui->setPosition(position.x + GUI_render_x, position.y + GUI_render_y);
+    game.getRenderWindow()->draw((*ui));
+
     std::string speedMeter = game.getToolbox()->createString("Speed: ", speed);
-    game.getTextRenderer()->renderText(position.x+30, position.y-80, speedMeter, FONT_SIZE::LARGE_FONT, false, sf::Color::Red);
-    speedMeter = game.getToolbox()->createString("Set speed: ", desiredSpeed);
-    game.getTextRenderer()->renderText(position.x+30, position.y-120, speedMeter, FONT_SIZE::LARGE_FONT, false, sf::Color::Red);
+    game.getTextRenderer()->renderText(position.x + GUI_render_x + 10, position.y + GUI_render_y + 20, speedMeter, FONT_SIZE::MEDIUM_FONT, true, sf::Color::White);
+    //speedMeter = game.getToolbox()->createString("Set speed: ", desiredSpeed);
+    //game.getTextRenderer()->renderText(position.x+30, position.y-120, speedMeter, FONT_SIZE::LARGE_FONT, false, sf::Color::Red);
     game.getRenderWindow()->draw((*sprite));
     std::string regionText = game.getToolbox()->createString("Region X:", playerRegion.first, " Y: ", playerRegion.second);
-    game.getTextRenderer()->renderText(position.x+30, position.y-40, regionText, FONT_SIZE::LARGE_FONT, true, sf::Color::Red);
+    game.getTextRenderer()->renderText(position.x + GUI_render_x + 10, position.y + GUI_render_y + 50, regionText, FONT_SIZE::MEDIUM_FONT, true, sf::Color::White);
 
-    std::string positionText = game.getToolbox()->createString("Pos X", position.x, " Y: ", position.y);
-    game.getTextRenderer()->renderText(position.x+30, position.y+80, positionText, FONT_SIZE::LARGE_FONT, true, sf::Color::Red);
+    //std::string positionText = game.getToolbox()->createString("Pos X", position.x, " Y: ", position.y);
+    //game.getTextRenderer()->renderText(position.x + GUI_render_x + 10, position.y + GUI_render_y + 60, positionText, FONT_SIZE::MEDIUM_FONT, true, sf::Color::Red);
+
+    std::string probesLeftStr = game.getToolbox()->createString("Probes: ", probesLeft);
+    std::string drillsLeftStr = game.getToolbox()->createString("Drills: ", drillsLeft);
+    if (probesLeft <= 0)
+        game.getTextRenderer()->renderText(position.x + GUI_render_x + 10, position.y + GUI_render_y + 80, probesLeftStr, FONT_SIZE::MEDIUM_FONT, true, sf::Color::Red);
+    else
+        game.getTextRenderer()->renderText(position.x + GUI_render_x + 10, position.y + GUI_render_y + 80, probesLeftStr, FONT_SIZE::MEDIUM_FONT, true, sf::Color::Green);
+
+    if (drillsLeft <= 0)
+        game.getTextRenderer()->renderText(position.x + GUI_render_x + 10, position.y + GUI_render_y + 110, drillsLeftStr, FONT_SIZE::MEDIUM_FONT, true, sf::Color::Red);
+    else
+        game.getTextRenderer()->renderText(position.x + GUI_render_x + 10, position.y + GUI_render_y + 110, drillsLeftStr, FONT_SIZE::MEDIUM_FONT, true, sf::Color::Green);
 }
 
 void Player::update()

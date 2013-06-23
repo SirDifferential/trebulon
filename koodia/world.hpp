@@ -8,6 +8,7 @@
 class Water;
 class Drill;
 class Probe;
+class Station;
 
 class World
 {
@@ -21,6 +22,7 @@ public:
     std::vector<std::shared_ptr<Water>> waterDeposits;
     std::vector<std::shared_ptr<Drill>> drills;
     std::vector<std::shared_ptr<Probe>> probes;
+    std::shared_ptr<Station> station;
 
     World();
     ~World();

@@ -7,6 +7,7 @@
 #include "water.hpp"
 #include "drill.hpp"
 #include "probe.hpp"
+#include "station.hpp"
 #include <noise/noise.h>
 #include "noiseutils.h"
 
@@ -289,6 +290,7 @@ void World::createWorld()
         waterDeposits.push_back(tempWater);
     }
     std::sort(waterDeposits.begin(), waterDeposits.end());
+    station = std::shared_ptr<Station>(new Station(sf::Vector2f(0,0)));
     fprintf(stderr, "Created %d water deposits\n", waterDeposits.size());
 }
 
@@ -307,6 +309,7 @@ void World::render()
     {
         (*iter)->render();
     }
+    station->render();
 }
 
 std::shared_ptr<sf::Sprite> World::checkRegionAtCoords(std::pair<int,int> coords)
@@ -324,12 +327,16 @@ void World::addDrill(sf::Vector2f coords)
 {
     std::shared_ptr<Drill> drill = std::shared_ptr<Drill>(new Drill(coords));
     drills.push_back(drill);
+    std::shared_ptr<Water> water = checkNearbyWater(coords, drill->getRadius());
+    drill->setWater(water);
 }
 
 void World::addProbe(sf::Vector2f coords)
 {
     std::shared_ptr<Probe> probe = std::shared_ptr<Probe>(new Probe(coords));
     probes.push_back(probe);
+    std::shared_ptr<Water> water = checkNearbyWater(coords, probe->getRadius());
+    probe->setWater(water);
 }
 
 std::shared_ptr<Water> World::checkNearbyWater(sf::Vector2f coordinates, float radius)

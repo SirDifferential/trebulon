@@ -11,6 +11,7 @@ Drill::Drill(sf::Vector2f coords)
     waterHarvested = 0;
     transferRate = 5;
     waterDeposit = nullptr;
+    radius = 300.0;
 }
 
 Drill::~Drill()
@@ -19,6 +20,11 @@ Drill::~Drill()
 
 void Drill::update()
 {
+    if (waterDeposit != nullptr && waterDeposit->getSize() > 0)
+        sprite = game.getDataStorage()->getSprite("drill_active");
+    else
+        sprite = game.getDataStorage()->getSprite("drill");
+
     if (waterDeposit != nullptr)
     {
         waterHarvested += waterDeposit->giveWater(transferRate);
@@ -51,3 +57,12 @@ long Drill::transferWater()
     }
 }
 
+void Drill::setWater(std::shared_ptr<Water> w)
+{
+    waterDeposit = w;
+}
+
+float Drill::getRadius()
+{
+    return radius;
+}

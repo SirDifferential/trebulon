@@ -15,6 +15,7 @@ private:
     long waterHarvested;
     long transferRate;
     std::shared_ptr<Water> waterDeposit;
+    float radius;
 public:
     Drill(sf::Vector2f coords);
     ~Drill();
@@ -25,6 +26,9 @@ public:
     long getInstallTime();
     long getWaterHarvested();
     long transferWater();
+
+    void setWater(std::shared_ptr<Water> w);
+    float getRadius();
 };
 
 #endif
