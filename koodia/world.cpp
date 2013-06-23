@@ -84,23 +84,23 @@ int getThreadsReady()
     return out;
 }
 
-void createWorldRegion(std::shared_ptr<World> world, std::vector<int>& params)
+void createWorldRegion(std::shared_ptr<World> world, std::vector<int>* params)
 {
-    if (params.size() < 4)
+    if (params->size() < 4)
     {
-        fprintf(stderr, "! World: Error at multithread world creation! Params size was %d when 4 was expected!\n", params.size());
+        fprintf(stderr, "! World: Error at multithread world creation! Params size was %d when 4 was expected!\n", params->size());
         fprintf(stderr, "! World: The params were:\n");
-        for (auto iter = params.begin(); iter != params.end(); iter++)
+        for (auto iter = params->begin(); iter != params->end(); iter++)
         {
             fprintf(stderr, "! World: %d ", (*iter));
         }
         fprintf(stderr, "\n");
         return;
     }
-    int x_start = params.at(0);
-    int x_end = params.at(1);
-    int y_start = params.at(2);
-    int y_end = params.at(3);
+    int x_start = params->at(0);
+    int x_end = params->at(1);
+    int y_start = params->at(2);
+    int y_end = params->at(3);
     //int size_x = params.at(4);
     //int size_y = params.at(5);
 
@@ -196,11 +196,11 @@ void World::createWorld()
     // Uh, why doesn't std::thread accept over 5 parameters? A temporary fix, for now...
     //int numberOfThreads = 8;
     //int regionsToCreate = 12;
-    std::vector<int>& params = std::vector<int>();
-    params.push_back(x_start);
-    params.push_back(x_end);
-    params.push_back(y_start);
-    params.push_back(y_end);
+    std::vector<int>* params = &std::vector<int>();
+    params->push_back(x_start);
+    params->push_back(x_end);
+    params->push_back(y_start);
+    params->push_back(y_end);
     //params.push_back(REGION_SIZE);
     //params.push_back(REGION_SIZE);
 
@@ -213,10 +213,10 @@ void World::createWorld()
     {
         for (int x = -INITIAL_AREA; x <= INITIAL_AREA; x += NOISE_SIZE)
         {
-            params.at(0) = x;
-            params.at(1) = x + NOISE_SIZE;
-            params.at(2) = y;
-            params.at(3) = y + NOISE_SIZE;
+            params->at(0) = x;
+            params->at(1) = x + NOISE_SIZE;
+            params->at(2) = y;
+            params->at(3) = y + NOISE_SIZE;
 
             // Limit thread spam
             while (getThreadUsage() >= max_threads)
@@ -269,10 +269,10 @@ void World::createWorld()
     fprintf(stderr, "# World: Created %d water deposits\n", waterDeposits.size());
 
     // Create map
-    params.at(0) = -INITIAL_AREA;
-    params.at(1) = INITIAL_AREA;
-    params.at(2) = -INITIAL_AREA;
-    params.at(3) = INITIAL_AREA;
+    params->at(0) = -INITIAL_AREA;
+    params->at(1) = INITIAL_AREA;
+    params->at(2) = -INITIAL_AREA;
+    params->at(3) = INITIAL_AREA;
     fprintf(stderr, "# World: Creating world map\n");
     std::shared_ptr<sf::Sprite> map = createWorldMap(params);
     std::shared_ptr<ShipMap> shipmap = std::shared_ptr<ShipMap>(new ShipMap());
@@ -280,23 +280,23 @@ void World::createWorld()
     game.getPlayer()->addMap(shipmap);
 }
 
-std::shared_ptr<sf::Sprite> World::createWorldMap(std::vector<int>& params)
+std::shared_ptr<sf::Sprite> World::createWorldMap(std::vector<int>* params)
 {
-    if (params.size() < 4)
+    if (params->size() < 4)
     {
-        fprintf(stderr, "! World: Error at multithread world creation! Params size was %d when 4 was expected!\n", params.size());
+        fprintf(stderr, "! World: Error at multithread world creation! Params size was %d when 4 was expected!\n", params->size());
         fprintf(stderr, "! World: The params were:\n");
-        for (auto iter = params.begin(); iter != params.end(); iter++)
+        for (auto iter = params->begin(); iter != params->end(); iter++)
         {
             fprintf(stderr, "! World: %d ", (*iter));
         }
         fprintf(stderr, "\n");
         return nullptr;
     }
-    int x_start = params.at(0);
-    int x_end = params.at(1);
-    int y_start = params.at(2);
-    int y_end = params.at(3);
+    int x_start = params->at(0);
+    int x_end = params->at(1);
+    int y_start = params->at(2);
+    int y_end = params->at(3);
 
     module::RidgedMulti mountainTerrain;
 

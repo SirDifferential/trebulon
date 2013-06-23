@@ -28,7 +28,7 @@ public:
     ~World();
 
     void createWorld();
-    std::shared_ptr<sf::Sprite> createWorldMap(std::vector<int>& settings);
+    std::shared_ptr<sf::Sprite> createWorldMap(std::vector<int>* settings);
     void render();
     void update();
     void addDrill(sf::Vector2f coords);
