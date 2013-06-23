@@ -150,6 +150,7 @@ void Game::renderAll()
 
 void Game::updateAll()
 {
+    world->update();
     player->update();
     center_view.setCenter(player->getPosition());
     mainWindow->setView(center_view);

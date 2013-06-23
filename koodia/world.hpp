@@ -19,6 +19,7 @@ public:
 
     void createWorld();
     void render();
+    void update();
 };
 
 #endif

@@ -139,9 +139,15 @@ void World::createWorld()
     params.push_back(regionSize);
     std::vector<int>& paramsRef = params;
 
-    for (int y = -32; y < 33; y += 16)
+
+    game.getRenderWindow()->clear();
+    std::string temp = game.getToolbox()->createString("Creating world! Please wait warmly...\nChunks finished: ", 0, " out of ", 81);
+    game.getTextRenderer()->renderText(20, 20, temp, FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);
+    game.forceRedraw();
+
+    for (int y = -64; y < 65; y += 16)
     {
-        for (int x = -32; x < 33; x += 16)
+        for (int x = -64; x < 65; x += 16)
         {
             params.at(0) = x;
             params.at(1) = x + 16;
@@ -178,4 +184,8 @@ void World::render()
     {
         game.getRenderWindow()->draw((*iter->get()));
     }
+}
+
+void World::update()
+{
 }
