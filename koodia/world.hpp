@@ -20,6 +20,8 @@ public:
     void createWorld();
     void render();
     void update();
+
+    std::shared_ptr<sf::Sprite> checkRegionAtCoords(std::pair<int,int> coords);
 };
 
 #endif

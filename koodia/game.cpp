@@ -161,6 +161,7 @@ void Game::start()
             {
                 case sf::Event::Closed:
                     exit();
+                    reactionGiven = true;
                     break;
                 case sf::Event::KeyPressed:
                     switch (e.key.code)
@@ -250,4 +251,9 @@ std::shared_ptr<DataStorage> Game::getDataStorage()
 std::shared_ptr<Toolbox> Game::getToolbox()
 {
     return toolbox;
+}
+
+std::shared_ptr<Player> Game::getPlayer()
+{
+    return player;
 }

@@ -3,6 +3,8 @@
 #include "datastorage.hpp"
 #include "textRenderer.hpp"
 #include "toolbox.hpp"
+#include "units.hpp"
+#include <math.h>
 
 Player::Player()
 {
@@ -35,8 +37,15 @@ Player::~Player()
 void Player::render()
 {
     std::string speedMeter = game.getToolbox()->createString("Speed: ", speed);
-    game.getTextRenderer()->renderText(80, 80, speedMeter, FONT_SIZE::LARGE_FONT, false, sf::Color::Red);
+    game.getTextRenderer()->renderText(position.x+30, position.y-80, speedMeter, FONT_SIZE::LARGE_FONT, false, sf::Color::Red);
+    speedMeter = game.getToolbox()->createString("Set speed: ", desiredSpeed);
+    game.getTextRenderer()->renderText(position.x+30, position.y-120, speedMeter, FONT_SIZE::LARGE_FONT, false, sf::Color::Red);
     game.getRenderWindow()->draw((*sprite));
+    std::string regionText = game.getToolbox()->createString("Region X:", playerRegion.first, " Y: ", playerRegion.second);
+    game.getTextRenderer()->renderText(position.x+30, position.y-40, regionText, FONT_SIZE::LARGE_FONT, true, sf::Color::Red);
+
+    std::string positionText = game.getToolbox()->createString("Pos X", position.x, " Y: ", position.y);
+    game.getTextRenderer()->renderText(position.x+30, position.y+80, positionText, FONT_SIZE::LARGE_FONT, true, sf::Color::Red);
 }
 
 void Player::update()
@@ -59,6 +68,12 @@ void Player::update()
     position.y += sin((double)facing*3.14159/180.0)*velocity.y;
     sprite->setPosition(position.x, position.y);
     sprite->setRotation(facing);
+
+    // Gives the largest multiple of REGION_SIZE that the player position contains
+    // This is used for figuring out in which region of the world the player currently roves in
+    // SFML coordinates use negative Y for up, must be converted
+    playerRegion.first = floor(position.x / REGION_SIZE) * NOISE_PER_PIXEL;
+    playerRegion.second = floor(-position.y / REGION_SIZE) * NOISE_PER_PIXEL;
 }
 
 void Player::setPosition(int x, int y)
@@ -98,4 +113,9 @@ void Player::rotateRight()
 sf::Vector2f Player::getPosition()
 {
     return position;
+}
+
+std::pair<int,int> Player::getRegion()
+{
+    return playerRegion;
 }

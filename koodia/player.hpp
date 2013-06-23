@@ -15,6 +15,7 @@ private:
     float speed;
     float desiredSpeed;
     float rotationalSpeed;
+    std::pair<int,int> playerRegion;
 public:
     Player();
     ~Player();
@@ -23,6 +24,7 @@ public:
     void update();
     void setPosition(int x, int y);
     sf::Vector2f getPosition();
+    std::pair<int,int> getRegion();
 
     void setSpeed(float speed);
     void setDesiredSpeed(float speed);
