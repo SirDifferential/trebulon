@@ -19,7 +19,7 @@ cd build
 cmake ..
 make
 cd ..
-sudo cp lib/* /usr/local/lib
+sudo cp build/lib/* /usr/local/lib
 sudo cp -r include/ /usr/local/include
 
 cd $HOME/bfikoodiskaba/koodia
