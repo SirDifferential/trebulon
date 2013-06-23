@@ -1,0 +1,18 @@
+Waters Miners of Trebulon is a game made in 48 hours for a playful competition on #blender.fi on Freenode.
+
+It's a game in which you set up water drilling stations and try to harvest precious water.
+
+Released under Creative Commons NC-SA.
+
+song_game.ogg is "Lasting Hope" by Kevin Macleod
+Lasting Hope by Kevin MacLeod is licensed under a CC Attribution 3.0.
+http://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100178.
+Permissions beyond the scope of this license are available at http://incompetech.com/music/royalty-free/licenses/.
+
+Libraries used:
+C++11 (requires shared_ptr and thread)
+SFML 2.0 http://www.sfml-dev.org/
+libnoise http://libnoise.sourceforge.net/
+
+Code by Jesse Kaukonen www.jessekaukonen.net
+Music by Kevin Macleod
