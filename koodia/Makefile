@@ -3,7 +3,7 @@ CFLAGS=-std=c++0x -I/home/gekko/SFML/include -fpermissive -I/usr/local/include/l
 LDFLAGS=-pthread -L/home/gekko/SFML/lib -lsfml-graphics -lsfml-window -lsfml-audio -lsfml-system -L/usr/local/lib -lnoise
 SOURCES=$(wildcard ./*.cpp)
 OBJECTS=$(SOURCES:.cpp=.o)
-EXECUTABLE=jokupeli
+EXECUTABLE=trebulon
 
 all: $(EXECUTABLE)
 
