@@ -145,9 +145,11 @@ void createWorldRegion(std::shared_ptr<World> world, std::vector<int>& params)
 
     tempTexture->create(REGION_SIZE, REGION_SIZE);
     tempTexture->update((*tempImage));
+
     //world->worldMapData[tempPair] = tempTexture;
     tempSprite->setTexture((*tempTexture));
-    tempSprite->setPosition(x_start*REGION_SIZE/NOISE_SIZE, y_start*REGION_SIZE/NOISE_SIZE);
+    tempSprite->setScale(SFML_SCALE_FACTOR, SFML_SCALE_FACTOR);
+    tempSprite->setPosition(x_start*REGION_SIZE/NOISE_SIZE*SFML_SCALE_FACTOR, y_start*REGION_SIZE/NOISE_SIZE*SFML_SCALE_FACTOR);
     //world->worldMap[tempPair] = tempSprite;
     //world->activeMapRegions.push_back(world->worldMap[tempPair]);
 
@@ -214,48 +216,13 @@ void World::createWorld()
     for (auto iter = threadContainer.begin(); iter != threadContainer.end(); iter++)
     {
         game.getRenderWindow()->clear();
-        std::string temp = game.getToolbox()->createString("Creating world! Please wait warmly...\nChunks finished: ", count, " out of ", (INITIAL_AREA*2/NOISE_SIZE)*(INITIAL_AREA*2/NOISE_SIZE));
+        std::string temp = game.getToolbox()->createString("Cleaning up...\nChunks finished: ", count, " out of ", (INITIAL_AREA*2/NOISE_SIZE)*(INITIAL_AREA*2/NOISE_SIZE));
         game.getTextRenderer()->renderText(20, 20, temp, FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);
         game.forceRedraw();
         fprintf(stderr, "%d / %d threads finished\n", count, threadContainer.size());
         (*iter)->join();
         count++;
     }
-
-    threadContainer.clear();
-
-    /*
-    for (int y = -INITIAL_AREA; y <= INITIAL_AREA; y += NOISE_SIZE)
-    {
-        for (int x = -INITIAL_AREA; x <= INITIAL_AREA; x += NOISE_SIZE)
-        {
-            params.at(0) = x;
-            params.at(1) = x + NOISE_SIZE;
-            params.at(2) = y;
-            params.at(3) = y + NOISE_SIZE;
-            //params.at(4) = REGION_SIZE;
-            //params.at(5) = REGION_SIZE;
-            std::shared_ptr<std::thread> temp = std::shared_ptr<std::thread>(new std::thread(createWorldRegion, game.getWorld(), paramsRef));
-            threadContainer.push_back(temp);
-            fprintf(stderr, "# World: Created thread number %d\n", threadContainer.size());
-        }
-    }
-    */
-
-    fprintf(stderr, "# World: Waiting for %d threads to exit\n", threadContainer.size());
-    count = 1;
-    for (auto iter = threadContainer.begin(); iter != threadContainer.end(); iter++)
-    {
-        game.getRenderWindow()->clear();
-        std::string temp = game.getToolbox()->createString("Creating world! Please wait warmly...\nChunks finished: ", count, " out of ", (INITIAL_AREA*2/NOISE_SIZE)*(INITIAL_AREA*2/NOISE_SIZE));
-        game.getTextRenderer()->renderText(20, 20, temp, FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);
-        game.forceRedraw();
-        fprintf(stderr, "%d / %d threads finished\n", count, threadContainer.size());
-        (*iter)->join();
-        count++;
-    }
-
-    
 }
 
 void World::render()
@@ -283,7 +250,9 @@ void World::update()
     std::pair<int,int> playerRegion = game.getPlayer()->getRegion();
     std::pair<int,int> searchRegion = playerRegion;
     std::vector<int>& params = std::vector<int>();
-/*
+
+    /*
+    // TODO: Figure out how to do this real time :/
     // Search an area of 4 units in all directions
     // If no existing land was found, generate it
     for (int y = playerRegion.second - 4*NOISE_SIZE; y < playerRegion.second + 4*NOISE_SIZE; y += NOISE_SIZE)
@@ -304,5 +273,5 @@ void World::update()
             }
         }
     }
-*/
+    */
 }
