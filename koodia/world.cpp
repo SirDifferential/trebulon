@@ -10,12 +10,17 @@
 #include <memory>
 #include <thread>
 #include <mutex>
+#include <chrono>
 
 using namespace noise;
 
 std::mutex dataMutex;
 std::vector<std::shared_ptr<std::thread>> threadContainer;
 std::mutex updateMutex;
+std::mutex threadReady;
+int threads_in_use = 0;
+const int max_threads = 8;
+int threads_reported_ready = 0;
 
 World::World()
 {
@@ -39,6 +44,39 @@ void storeWorldCreationResult(std::shared_ptr<World> w, std::shared_ptr<sf::Spri
     w->worldMap[coords] = sprite;
     w->activeMapRegions.push_back(w->worldMap[coords]);
     dataMutex.unlock();
+}
+
+void updateThreadUsage(bool plus)
+{
+    updateMutex.lock();
+    if (plus)
+        threads_in_use++;
+    else
+        threads_in_use--;
+    updateMutex.unlock();
+}
+
+void incrementThreadReadiness()
+{
+    threadReady.lock();
+    threads_reported_ready++;
+    threadReady.unlock();
+}
+
+int getThreadUsage()
+{
+    updateMutex.lock();
+    int out = threads_in_use;
+    updateMutex.unlock();
+    return out;
+}
+
+int getThreadsReady()
+{
+    threadReady.lock();
+    int out = threads_reported_ready;
+    threadReady.unlock();
+    return out;
 }
 
 void createWorldRegion(std::shared_ptr<World> world, std::vector<int>& params)
@@ -109,12 +147,14 @@ void createWorldRegion(std::shared_ptr<World> world, std::vector<int>& params)
     tempTexture->update((*tempImage));
     //world->worldMapData[tempPair] = tempTexture;
     tempSprite->setTexture((*tempTexture));
-    tempSprite->setPosition(x_start*NOISE_PER_PIXEL*2, y_start*NOISE_PER_PIXEL*2);
+    tempSprite->setPosition(x_start*REGION_SIZE/NOISE_SIZE, y_start*REGION_SIZE/NOISE_SIZE);
     //world->worldMap[tempPair] = tempSprite;
     //world->activeMapRegions.push_back(world->worldMap[tempPair]);
 
     storeWorldCreationResult(world, tempSprite, tempTexture, tempPair);
 
+    updateThreadUsage(false);
+    incrementThreadReadiness();
     fprintf(stderr, "# World: creation finished\n");
 }
 
@@ -129,33 +169,43 @@ void World::createWorld()
     // Uh, why doesn't std::thread accept over 5 parameters? A temporary fix, for now...
     //int numberOfThreads = 8;
     //int regionsToCreate = 12;
-    std::vector<int> params;
+    std::vector<int>& params = std::vector<int>();
     params.push_back(x_start);
     params.push_back(x_end);
     params.push_back(y_start);
     params.push_back(y_end);
     //params.push_back(REGION_SIZE);
     //params.push_back(REGION_SIZE);
-    std::vector<int>& paramsRef = params;
 
     game.getRenderWindow()->clear();
-    std::string temp = game.getToolbox()->createString("Creating world! Please wait warmly...\nChunks finished: ", 0, " out of ", (INITIAL_AREA/NOISE_PER_PIXEL*2)*(INITIAL_AREA/NOISE_PER_PIXEL*2));
+    std::string temp = game.getToolbox()->createString("Creating world! Please wait warmly...\nChunks finished: ", 0, " out of ", (INITIAL_AREA/NOISE_SIZE*2)*(INITIAL_AREA/NOISE_SIZE*2));
     game.getTextRenderer()->renderText(20, 20, temp, FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);
     game.forceRedraw();
 
-    for (int y = -INITIAL_AREA; y <= INITIAL_AREA; y += NOISE_PER_PIXEL)
+    for (int y = -INITIAL_AREA; y <= INITIAL_AREA; y += NOISE_SIZE)
     {
-        for (int x = -INITIAL_AREA; x <= INITIAL_AREA; x += NOISE_PER_PIXEL)
+        for (int x = -INITIAL_AREA; x <= INITIAL_AREA; x += NOISE_SIZE)
         {
             params.at(0) = x;
-            params.at(1) = x + NOISE_PER_PIXEL;
+            params.at(1) = x + NOISE_SIZE;
             params.at(2) = y;
-            params.at(3) = y + NOISE_PER_PIXEL;
-            //params.at(4) = REGION_SIZE;
-            //params.at(5) = REGION_SIZE;
-            std::shared_ptr<std::thread> temp = std::shared_ptr<std::thread>(new std::thread(createWorldRegion, game.getWorld(), paramsRef));
+            params.at(3) = y + NOISE_SIZE;
+
+            // Limit thread spam
+            while (getThreadUsage() >= max_threads)
+            {
+                std::this_thread::sleep_for(std::chrono::microseconds(10));
+            }
+
+            std::shared_ptr<std::thread> temp = std::shared_ptr<std::thread>(new std::thread(createWorldRegion, game.getWorld(), params));
+            updateThreadUsage(true);
             threadContainer.push_back(temp);
             fprintf(stderr, "# World: Created thread number %d\n", threadContainer.size());
+
+            game.getRenderWindow()->clear();
+            std::string tempText = game.getToolbox()->createString("Creating world! Please wait warmly...\nChunks finished: ", getThreadsReady(), " out of ", (INITIAL_AREA*2/NOISE_SIZE)*(INITIAL_AREA*2/NOISE_SIZE));
+            game.getTextRenderer()->renderText(20, 20, tempText, FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);
+            game.forceRedraw();
         }
     }
 
@@ -164,7 +214,7 @@ void World::createWorld()
     for (auto iter = threadContainer.begin(); iter != threadContainer.end(); iter++)
     {
         game.getRenderWindow()->clear();
-        std::string temp = game.getToolbox()->createString("Creating world! Please wait warmly...\nChunks finished: ", count, " out of ", (INITIAL_AREA*2/NOISE_PER_PIXEL)*(INITIAL_AREA*2/NOISE_PER_PIXEL));
+        std::string temp = game.getToolbox()->createString("Creating world! Please wait warmly...\nChunks finished: ", count, " out of ", (INITIAL_AREA*2/NOISE_SIZE)*(INITIAL_AREA*2/NOISE_SIZE));
         game.getTextRenderer()->renderText(20, 20, temp, FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);
         game.forceRedraw();
         fprintf(stderr, "%d / %d threads finished\n", count, threadContainer.size());
@@ -173,6 +223,39 @@ void World::createWorld()
     }
 
     threadContainer.clear();
+
+    /*
+    for (int y = -INITIAL_AREA; y <= INITIAL_AREA; y += NOISE_SIZE)
+    {
+        for (int x = -INITIAL_AREA; x <= INITIAL_AREA; x += NOISE_SIZE)
+        {
+            params.at(0) = x;
+            params.at(1) = x + NOISE_SIZE;
+            params.at(2) = y;
+            params.at(3) = y + NOISE_SIZE;
+            //params.at(4) = REGION_SIZE;
+            //params.at(5) = REGION_SIZE;
+            std::shared_ptr<std::thread> temp = std::shared_ptr<std::thread>(new std::thread(createWorldRegion, game.getWorld(), paramsRef));
+            threadContainer.push_back(temp);
+            fprintf(stderr, "# World: Created thread number %d\n", threadContainer.size());
+        }
+    }
+    */
+
+    fprintf(stderr, "# World: Waiting for %d threads to exit\n", threadContainer.size());
+    count = 1;
+    for (auto iter = threadContainer.begin(); iter != threadContainer.end(); iter++)
+    {
+        game.getRenderWindow()->clear();
+        std::string temp = game.getToolbox()->createString("Creating world! Please wait warmly...\nChunks finished: ", count, " out of ", (INITIAL_AREA*2/NOISE_SIZE)*(INITIAL_AREA*2/NOISE_SIZE));
+        game.getTextRenderer()->renderText(20, 20, temp, FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);
+        game.forceRedraw();
+        fprintf(stderr, "%d / %d threads finished\n", count, threadContainer.size());
+        (*iter)->join();
+        count++;
+    }
+
+    
 }
 
 void World::render()
@@ -200,12 +283,12 @@ void World::update()
     std::pair<int,int> playerRegion = game.getPlayer()->getRegion();
     std::pair<int,int> searchRegion = playerRegion;
     std::vector<int>& params = std::vector<int>();
-
+/*
     // Search an area of 4 units in all directions
     // If no existing land was found, generate it
-    for (int y = playerRegion.second - 4*NOISE_PER_PIXEL; y < playerRegion.second + 4*NOISE_PER_PIXEL; y += NOISE_PER_PIXEL)
+    for (int y = playerRegion.second - 4*NOISE_SIZE; y < playerRegion.second + 4*NOISE_SIZE; y += NOISE_SIZE)
     {
-        for (int x = playerRegion.first - 4*NOISE_PER_PIXEL; x < playerRegion.first + 4*NOISE_PER_PIXEL; x += NOISE_PER_PIXEL)
+        for (int x = playerRegion.first - 4*NOISE_SIZE; x < playerRegion.first + 4*NOISE_SIZE; x += NOISE_SIZE)
         {
             searchRegion.first = x;
             searchRegion.second = y;
@@ -214,11 +297,12 @@ void World::update()
             {
                 fprintf(stderr, "No terrain found at %d %d\n", searchRegion.first, searchRegion.second);
                 params.push_back(searchRegion.first);
-                params.push_back(searchRegion.first + NOISE_PER_PIXEL);
+                params.push_back(searchRegion.first + NOISE_SIZE);
                 params.push_back(searchRegion.second);
-                params.push_back(searchRegion.second + NOISE_PER_PIXEL);
+                params.push_back(searchRegion.second + NOISE_SIZE);
                 createWorldRegion(game.getWorld(), params);
             }
         }
     }
+*/
 }

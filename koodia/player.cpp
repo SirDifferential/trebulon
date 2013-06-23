@@ -72,8 +72,8 @@ void Player::update()
     // Gives the largest multiple of REGION_SIZE that the player position contains
     // This is used for figuring out in which region of the world the player currently roves in
     // SFML coordinates use negative Y for up, must be converted
-    playerRegion.first = floor(position.x / REGION_SIZE) * NOISE_PER_PIXEL;
-    playerRegion.second = floor(-position.y / REGION_SIZE) * NOISE_PER_PIXEL;
+    playerRegion.first = floor(position.x / REGION_SIZE) * NOISE_SIZE;
+    playerRegion.second = floor(-position.y / REGION_SIZE) * NOISE_SIZE;
 }
 
 void Player::setPosition(int x, int y)
