@@ -19,6 +19,15 @@ void DataStorage::loadData()
     loadTexture("player", "data/gfx/player.png");
     loadTexture("banner", "data/gfx/banner.png");
     loadTexture("help", "data/gfx/keys.png");
+    loadTexture("drill", "data/gfx/drill.png");
+    loadTexture("probe", "data/gfx/probe.png");
+    std::shared_ptr<sf::Sprite> drillImage = std::shared_ptr<sf::Sprite>(new sf::Sprite());
+    drillImage->setTexture((*getTexture("drill")));
+    spriteMap["drill"] = drillImage;
+
+    std::shared_ptr<sf::Sprite> probeImage = std::shared_ptr<sf::Sprite>(new sf::Sprite());
+    probeImage->setTexture((*getTexture("probe")));
+    spriteMap["probe"] = probeImage;
 
     game.getRenderWindow()->clear();
     game.getTextRenderer()->renderText(20, 20, "Loading music", FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);
@@ -84,3 +93,14 @@ std::shared_ptr<sf::Music> DataStorage::getMusic(int id)
     return it->second;
 }
 
+std::shared_ptr<sf::Sprite> DataStorage::getSprite(std::string name)
+{
+    std::map<std::string ,std::shared_ptr<sf::Sprite> >::iterator it;
+    it = spriteMap.find(name);
+    if (it == spriteMap.end())
+    {
+        fprintf(stderr, "! DataStorage: Image not found: %s\n", name.c_str());
+        return nullptr;
+    }
+    return it->second;
+}

@@ -21,6 +21,7 @@ private:
     std::shared_ptr<DataStorage> dataStorage;
     std::shared_ptr<Player> player;
     std::shared_ptr<Toolbox> toolbox;
+    long currentTime;
     
     int resolution_x;
     int resolution_y;
@@ -48,6 +49,7 @@ public:
     std::shared_ptr<Player> getPlayer();
     std::shared_ptr<World> getWorld();
     std::shared_ptr<Toolbox> getToolbox();
+    long getTime();
 };
 
 extern Game game;

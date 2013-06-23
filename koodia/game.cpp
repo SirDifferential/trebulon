@@ -15,6 +15,7 @@ Game::Game()
     dataStorage = std::shared_ptr<DataStorage>(new DataStorage());
     toolbox = std::shared_ptr<Toolbox>(new Toolbox());
     center_view.setCenter(sf::Vector2f(400,300));
+    currentTime++;
 }
 
 Game::~Game()
@@ -80,6 +81,12 @@ void Game::checkEvents()
                         break;
                     case sf::Keyboard::Num0:
                         player->setDesiredSpeed(0);
+                        break;
+                    case sf::Keyboard::Z:
+                        player->dropDrill();
+                        break;
+                    case sf::Keyboard::X:
+                        player->dropProbe();
                         break;
                     break;
                 }
@@ -217,12 +224,13 @@ int Game::mainloop()
 
     while (stop_running == false)
     {
+        currentTime++;
         fps = 1 / fps_clock.getElapsedTime().asSeconds();
         fps_clock.restart();
         if (main_clock.getElapsedTime().asSeconds() > nextFPS)
         {
             nextFPS += 1;
-            fprintf(stderr, "%d\n", fps);
+            //fprintf(stderr, "%d\n", fps);
         }
         checkEvents();
         updateAll();
@@ -261,4 +269,9 @@ std::shared_ptr<Player> Game::getPlayer()
 std::shared_ptr<World> Game::getWorld()
 {
     return world;
+}
+
+long Game::getTime()
+{
+    return currentTime;
 }

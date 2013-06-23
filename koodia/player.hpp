@@ -16,6 +16,11 @@ private:
     float desiredSpeed;
     float rotationalSpeed;
     std::pair<int,int> playerRegion;
+
+    int drillsLeft;
+    int probesLeft;
+    long objectPlantTime;
+    long nextPlantTime;
 public:
     Player();
     ~Player();
@@ -31,6 +36,9 @@ public:
 
     void rotateLeft();
     void rotateRight();
+
+    void dropDrill();
+    void dropProbe();
 };
 
 #endif

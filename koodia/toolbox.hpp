@@ -2,6 +2,7 @@
 #define __TOOLBOX_HPP_
 
 #include <string>
+#include <SFML/Graphics.hpp>
 
 class Toolbox
 {
@@ -12,6 +13,8 @@ public:
 
     std::string createString(std::string s, float i);
     std::string createString(std::string s1, float num1, std::string s2, float num2);
+    int giveRandomInt(int min, int max);
+    float vectorDistance(sf::Vector2f a, sf::Vector2f b);
 };
 
 #endif

@@ -4,6 +4,9 @@
 #include "textRenderer.hpp"
 #include "toolbox.hpp"
 #include "units.hpp"
+#include "world.hpp"
+#include "probe.hpp"
+#include "drill.hpp"
 #include <math.h>
 
 Player::Player()
@@ -28,6 +31,10 @@ Player::Player()
     acceleration = sf::Vector2f(0.01, 0.01);
     facing = 180;
     rotationalSpeed = 2.0f;
+    drillsLeft = 5;
+    probesLeft = 50;
+    objectPlantTime = 0;
+    nextPlantTime = 0;
 }
 
 Player::~Player()
@@ -74,6 +81,42 @@ void Player::update()
     // SFML coordinates use negative Y for up, must be converted
     playerRegion.first = floor(position.x / REGION_SIZE) * NOISE_SIZE;
     playerRegion.second = floor(-position.y / REGION_SIZE) * NOISE_SIZE;
+}
+
+void Player::dropDrill()
+{
+    if (drillsLeft <= 0)
+    {
+        fprintf(stderr, "# Player: no drills left!\n");
+        return;
+    }
+    if (nextPlantTime > game.getTime())
+    {
+        fprintf(stderr, "# Player: Can't place drills yet! %d %d %d\n", game.getTime(), objectPlantTime, nextPlantTime);
+        return;
+    }
+    game.getWorld()->addDrill(position);
+    objectPlantTime = game.getTime();
+    nextPlantTime = objectPlantTime + 200;
+    drillsLeft--;
+}
+
+void Player::dropProbe()
+{
+    if (probesLeft <= 0)
+    {
+        fprintf(stderr, "# Player: no probes left!\n");
+        return;
+    }
+    if (nextPlantTime > game.getTime())
+    {
+        fprintf(stderr, "# Player: Can't place probes yet! %d %d %d\n", game.getTime(), objectPlantTime, nextPlantTime);
+        return;
+    }
+    game.getWorld()->addProbe(position);
+    objectPlantTime = game.getTime();
+    nextPlantTime = objectPlantTime + 200;
+    probesLeft--;
 }
 
 void Player::setPosition(int x, int y)

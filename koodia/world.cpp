@@ -4,6 +4,9 @@
 #include "toolbox.hpp"
 #include "player.hpp"
 #include "units.hpp"
+#include "water.hpp"
+#include "drill.hpp"
+#include "probe.hpp"
 #include <noise/noise.h>
 #include "noiseutils.h"
 
@@ -11,6 +14,7 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include <algorithm>
 
 using namespace noise;
 
@@ -103,6 +107,7 @@ void createWorldRegion(std::shared_ptr<World> world, std::vector<int>& params)
     tempPair.first = x_start;
     tempPair.second = y_start;
 
+    /*
     module::Perlin myModule;
     utils::NoiseMap heightMap;
     utils::NoiseMapBuilderPlane heightMapBuilder;
@@ -125,7 +130,51 @@ void createWorldRegion(std::shared_ptr<World> world, std::vector<int>& params)
     renderer.SetLightContrast (3.0);
     renderer.SetLightBrightness (2.0);
     renderer.Render ();
+    */
     
+    module::RidgedMulti mountainTerrain;
+
+    module::Billow baseFlatTerrain;
+    baseFlatTerrain.SetFrequency (2.0);
+
+    module::ScaleBias flatTerrain;
+    flatTerrain.SetSourceModule (0, baseFlatTerrain);
+    flatTerrain.SetScale (0.125);
+    flatTerrain.SetBias (-0.75);
+
+    module::Perlin terrainType;
+    terrainType.SetFrequency (0.5);
+    terrainType.SetPersistence (0.25);
+
+    module::Select finalTerrain;
+    finalTerrain.SetSourceModule (0, flatTerrain);
+    finalTerrain.SetSourceModule (1, mountainTerrain);
+    finalTerrain.SetControlModule (terrainType);
+    finalTerrain.SetBounds (0.0, 1000.0);
+    finalTerrain.SetEdgeFalloff (0.125);
+
+    utils::NoiseMap heightMap;
+    utils::NoiseMapBuilderPlane heightMapBuilder;
+    heightMapBuilder.SetSourceModule (finalTerrain);
+    heightMapBuilder.SetDestNoiseMap (heightMap);
+    heightMapBuilder.SetDestSize (REGION_SIZE, REGION_SIZE);
+    heightMapBuilder.SetBounds (x_start, x_end, y_start, y_end);
+    heightMapBuilder.Build ();
+
+    utils::RendererImage renderer;
+    utils::Image image;
+    renderer.SetSourceNoiseMap (heightMap);
+    renderer.SetDestImage (image);
+    renderer.ClearGradient ();
+    renderer.AddGradientPoint (-1.00, utils::Color ( 141, 131,   121, 255));
+    renderer.AddGradientPoint (-0.25, utils::Color (213, 185,   161, 255));
+    renderer.AddGradientPoint ( 0.25, utils::Color (87, 64, 43, 255));
+    renderer.AddGradientPoint ( 1.00, utils::Color (221, 201, 175, 255));
+    renderer.EnableLight ();
+    renderer.SetLightContrast (3.0);
+    renderer.SetLightBrightness (2.0);
+    renderer.Render ();
+
     std::shared_ptr<sf::Sprite> tempSprite(new sf::Sprite());
     std::shared_ptr<sf::Texture> tempTexture(new sf::Texture());
     std::shared_ptr<sf::Image> tempImage = std::shared_ptr<sf::Image>(new sf::Image());
@@ -223,13 +272,40 @@ void World::createWorld()
         (*iter)->join();
         count++;
     }
+
+    game.getTextRenderer()->renderText(20, 20, "Placing water...", FONT_SIZE::LARGE_FONT, true, sf::Color::Blue);
+    waterDepositCount = game.getToolbox()->giveRandomInt(200, 500);
+    sf::Vector2f tempPosition;
+    float tempDepth = 0.0f;
+    float tempSize = 0.0f;
+    for (int i = 0; i < waterDepositCount; i++)
+    {
+        std::shared_ptr<Water> tempWater = std::shared_ptr<Water>(new Water());
+        tempPosition.x = game.getToolbox()->giveRandomInt(-50000,50000);
+        tempPosition.y = game.getToolbox()->giveRandomInt(-50000,50000);
+        tempWater->setPosition(tempPosition);
+        tempWater->setSize(game.getToolbox()->giveRandomInt(300, 1000000));
+        tempWater->setDepth(game.getToolbox()->giveRandomInt(2, 4000));
+        waterDeposits.push_back(tempWater);
+    }
+    std::sort(waterDeposits.begin(), waterDeposits.end());
+    fprintf(stderr, "Created %d water deposits\n", waterDeposits.size());
 }
 
 void World::render()
 {
+    // TODO: Render only what is seen
     for (auto iter = activeMapRegions.begin(); iter != activeMapRegions.end(); iter++)
     {
         game.getRenderWindow()->draw((*iter->get()));
+    }
+    for (auto iter = drills.begin(); iter != drills.end(); iter++)
+    {
+        (*iter)->render();
+    }
+    for (auto iter = probes.begin(); iter != probes.end(); iter++)
+    {
+        (*iter)->render();
     }
 }
 
@@ -244,12 +320,48 @@ std::shared_ptr<sf::Sprite> World::checkRegionAtCoords(std::pair<int,int> coords
     }
 }
 
+void World::addDrill(sf::Vector2f coords)
+{
+    std::shared_ptr<Drill> drill = std::shared_ptr<Drill>(new Drill(coords));
+    drills.push_back(drill);
+}
+
+void World::addProbe(sf::Vector2f coords)
+{
+    std::shared_ptr<Probe> probe = std::shared_ptr<Probe>(new Probe(coords));
+    probes.push_back(probe);
+}
+
+std::shared_ptr<Water> World::checkNearbyWater(sf::Vector2f coordinates, float radius)
+{
+    for (auto iter = waterDeposits.begin(); iter != waterDeposits.end(); iter++)
+    {
+        if (game.getToolbox()->vectorDistance((*iter)->getPosition(), coordinates) < radius)
+        {
+            return (*iter);
+        }
+
+    }
+
+    return nullptr;
+}
+
 void World::update()
 {
     // See if new areas need to be generated
     std::pair<int,int> playerRegion = game.getPlayer()->getRegion();
     std::pair<int,int> searchRegion = playerRegion;
     std::vector<int>& params = std::vector<int>();
+
+    for (auto iter = drills.begin(); iter != drills.end(); iter++)
+    {
+        (*iter)->update();
+    }
+
+    for (auto iter = probes.begin(); iter != probes.end(); iter++)
+    {
+        (*iter)->update();
+    }
 
     /*
     // TODO: Figure out how to do this real time :/
