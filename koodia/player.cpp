@@ -7,6 +7,7 @@
 #include "world.hpp"
 #include "probe.hpp"
 #include "drill.hpp"
+#include "shipMap.hpp"
 #include <math.h>
 
 Player::Player()
@@ -38,6 +39,7 @@ Player::Player()
     ui = game.getDataStorage()->getSprite("UI");
     GUI_render_x = -480;
     GUI_render_y = -475;
+    mapVisible = false;
 }
 
 Player::~Player()
@@ -71,6 +73,11 @@ void Player::render()
         game.getTextRenderer()->renderText(position.x + GUI_render_x + 10, position.y + GUI_render_y + 110, drillsLeftStr, FONT_SIZE::MEDIUM_FONT, true, sf::Color::Red);
     else
         game.getTextRenderer()->renderText(position.x + GUI_render_x + 10, position.y + GUI_render_y + 110, drillsLeftStr, FONT_SIZE::MEDIUM_FONT, true, sf::Color::Green);
+
+    if (mapVisible && map != nullptr)
+    {
+        map->render();
+    }
 }
 
 void Player::update()
@@ -99,6 +106,17 @@ void Player::update()
     // SFML coordinates use negative Y for up, must be converted
     playerRegion.first = floor(position.x / REGION_SIZE) * NOISE_SIZE;
     playerRegion.second = floor(-position.y / REGION_SIZE) * NOISE_SIZE;
+
+    if (map != nullptr)
+        map->update();
+}
+
+void Player::showMap()
+{
+    if (mapVisible == false)
+        mapVisible = true;
+    else
+        mapVisible = false;
 }
 
 void Player::dropDrill()
@@ -179,4 +197,9 @@ sf::Vector2f Player::getPosition()
 std::pair<int,int> Player::getRegion()
 {
     return playerRegion;
+}
+
+void Player::addMap(std::shared_ptr<ShipMap> m)
+{
+    map = m;
 }

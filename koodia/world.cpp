@@ -108,31 +108,6 @@ void createWorldRegion(std::shared_ptr<World> world, std::vector<int>& params)
     tempPair.first = x_start;
     tempPair.second = y_start;
 
-    /*
-    module::Perlin myModule;
-    utils::NoiseMap heightMap;
-    utils::NoiseMapBuilderPlane heightMapBuilder;
-    heightMapBuilder.SetSourceModule (myModule);
-    heightMapBuilder.SetDestNoiseMap (heightMap);
-    heightMapBuilder.SetDestSize (REGION_SIZE, REGION_SIZE);
-    heightMapBuilder.SetBounds (x_start, x_end, y_start, y_end);
-    heightMapBuilder.Build ();
-
-    utils::RendererImage renderer;
-    utils::Image image;
-    renderer.SetSourceNoiseMap (heightMap);
-    renderer.SetDestImage (image);
-    renderer.ClearGradient ();
-    renderer.AddGradientPoint (-1.00, utils::Color ( 32, 160,   0, 255)); // grass
-    renderer.AddGradientPoint (-0.25, utils::Color (224, 224,   0, 255)); // dirt
-    renderer.AddGradientPoint ( 0.25, utils::Color (128, 128, 128, 255)); // rock
-    renderer.AddGradientPoint ( 1.00, utils::Color (255, 255, 255, 255)); // snow
-    renderer.EnableLight ();
-    renderer.SetLightContrast (3.0);
-    renderer.SetLightBrightness (2.0);
-    renderer.Render ();
-    */
-    
     module::RidgedMulti mountainTerrain;
 
     module::Billow baseFlatTerrain;
@@ -269,7 +244,7 @@ void World::createWorld()
         std::string temp = game.getToolbox()->createString("Cleaning up...\nChunks finished: ", count, " out of ", (INITIAL_AREA*2/NOISE_SIZE)*(INITIAL_AREA*2/NOISE_SIZE));
         game.getTextRenderer()->renderText(20, 20, temp, FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);
         game.forceRedraw();
-        fprintf(stderr, "%d / %d threads finished\n", count, threadContainer.size());
+        fprintf(stderr, "# World: %d / %d threads finished\n", count, threadContainer.size());
         (*iter)->join();
         count++;
     }
@@ -291,7 +266,105 @@ void World::createWorld()
     }
     std::sort(waterDeposits.begin(), waterDeposits.end());
     station = std::shared_ptr<Station>(new Station(sf::Vector2f(0,0)));
-    fprintf(stderr, "Created %d water deposits\n", waterDeposits.size());
+    fprintf(stderr, "# World: Created %d water deposits\n", waterDeposits.size());
+
+    // Create map
+    params.at(0) = -INITIAL_AREA;
+    params.at(1) = INITIAL_AREA;
+    params.at(2) = -INITIAL_AREA;
+    params.at(3) = INITIAL_AREA;
+    fprintf(stderr, "# World: Creating world map\n");
+    std::shared_ptr<sf::Sprite> map = createWorldMap(params);
+    std::shared_ptr<ShipMap> shipmap = std::shared_ptr<ShipMap>(new ShipMap());
+    shipmap->setSprite(map);
+    game.getPlayer()->addMap(shipmap);
+}
+
+std::shared_ptr<sf::Sprite> World::createWorldMap(std::vector<int>& params)
+{
+    if (params.size() < 4)
+    {
+        fprintf(stderr, "! World: Error at multithread world creation! Params size was %d when 4 was expected!\n", params.size());
+        fprintf(stderr, "! World: The params were:\n");
+        for (auto iter = params.begin(); iter != params.end(); iter++)
+        {
+            fprintf(stderr, "! World: %d ", (*iter));
+        }
+        fprintf(stderr, "\n");
+        return nullptr;
+    }
+    int x_start = params.at(0);
+    int x_end = params.at(1);
+    int y_start = params.at(2);
+    int y_end = params.at(3);
+
+    module::RidgedMulti mountainTerrain;
+
+    module::Billow baseFlatTerrain;
+    baseFlatTerrain.SetFrequency (2.0);
+
+    module::ScaleBias flatTerrain;
+    flatTerrain.SetSourceModule (0, baseFlatTerrain);
+    flatTerrain.SetScale (0.125);
+    flatTerrain.SetBias (-0.75);
+
+    module::Perlin terrainType;
+    terrainType.SetFrequency (0.5);
+    terrainType.SetPersistence (0.25);
+
+    module::Select finalTerrain;
+    finalTerrain.SetSourceModule (0, flatTerrain);
+    finalTerrain.SetSourceModule (1, mountainTerrain);
+    finalTerrain.SetControlModule (terrainType);
+    finalTerrain.SetBounds (0.0, 1000.0);
+    finalTerrain.SetEdgeFalloff (0.125);
+
+    utils::NoiseMap heightMap;
+    utils::NoiseMapBuilderPlane heightMapBuilder;
+    heightMapBuilder.SetSourceModule (finalTerrain);
+    heightMapBuilder.SetDestNoiseMap (heightMap);
+    heightMapBuilder.SetDestSize (256,256);
+    heightMapBuilder.SetBounds (-2, 2, -2, 2);
+    heightMapBuilder.Build ();
+
+    utils::RendererImage renderer;
+    utils::Image image;
+    renderer.SetSourceNoiseMap (heightMap);
+    renderer.SetDestImage (image);
+    renderer.ClearGradient ();
+    renderer.AddGradientPoint (-1.00, utils::Color ( 141, 131,   121, 255));
+    renderer.AddGradientPoint (-0.25, utils::Color (213, 185,   161, 255));
+    renderer.AddGradientPoint ( 0.25, utils::Color (87, 64, 43, 255));
+    renderer.AddGradientPoint ( 1.00, utils::Color (221, 201, 175, 255));
+    renderer.EnableLight ();
+    renderer.SetLightContrast (3.0);
+    renderer.SetLightBrightness (2.0);
+    renderer.Render ();
+
+    std::shared_ptr<sf::Sprite> tempSprite(new sf::Sprite());
+    std::shared_ptr<sf::Texture> tempTexture(new sf::Texture());
+    std::shared_ptr<sf::Image> tempImage = std::shared_ptr<sf::Image>(new sf::Image());
+    tempImage->create(image.GetWidth(), image.GetHeight());
+
+    utils::Color c;
+
+    fprintf(stderr, "# World: Copying world data to sf::sprite\n");
+    for (int i = 0; i < image.GetWidth(); i++)
+    {
+        for (int j = 0; j < image.GetHeight(); j++)
+        {
+            c = image.GetValue(i,j);
+            tempImage->setPixel(i, j, sf::Color(c.red, c.green, c.red, c.alpha));
+        }
+    }
+
+
+    tempTexture->create(256, 256);
+    tempTexture->update((*tempImage));
+    tempSprite->setTexture((*tempTexture));
+    //tempSprite->setScale(0.4f, 0.4f);
+    tempSprite->setPosition(0,0);
+    return tempSprite;
 }
 
 void World::render()

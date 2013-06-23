@@ -1,8 +1,12 @@
 #ifndef __PLAYER_HPP_
 #define __PLAYER_HPP_
 
+#include "shipMap.hpp"
+
 #include <SFML/Graphics.hpp>
 #include <memory>
+
+class ShipMap;
 
 class Player
 {
@@ -17,6 +21,7 @@ private:
     float rotationalSpeed;
     std::pair<int,int> playerRegion;
     std::shared_ptr<sf::Sprite> ui;
+    std::shared_ptr<ShipMap> map;
 
     int drillsLeft;
     int probesLeft;
@@ -24,6 +29,7 @@ private:
     long nextPlantTime;
     int GUI_render_x;
     int GUI_render_y;
+    bool mapVisible;
 public:
     Player();
     ~Player();
@@ -42,6 +48,9 @@ public:
 
     void dropDrill();
     void dropProbe();
+
+    void addMap(std::shared_ptr<ShipMap> m);
+    void showMap();
 
 };
 

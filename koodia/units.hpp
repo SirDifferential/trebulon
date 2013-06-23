@@ -25,16 +25,18 @@
 * If this was done with CUDA things would be fine and dandy...
 *
 */
-/*
+
 const int NOISE_SIZE = 4;
 const int REGION_SIZE = 1024;
 const int INITIAL_AREA = 16;
 const float SFML_SCALE_FACTOR = 8.0f;
-*/
 
+/*
 const int NOISE_SIZE = 4;
 const int REGION_SIZE = 1024;
 const int INITIAL_AREA = 4;
 const float SFML_SCALE_FACTOR = 8.0f;
+*/
+const int MAP_SIZE = 1024;
 
 #endif

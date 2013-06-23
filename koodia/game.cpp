@@ -88,6 +88,9 @@ void Game::checkEvents()
                     case sf::Keyboard::X:
                         player->dropProbe();
                         break;
+                    case sf::Keyboard::M:
+                        player->showMap();
+                        break;
                     break;
                 }
                 break;
@@ -142,7 +145,10 @@ void Game::start()
     mainWindow->clear();
     getTextRenderer()->renderText(20, 20, "Creating world\nplease wait warmly", FONT_SIZE::LARGE_FONT, true, sf::Color::Magenta);
     forceRedraw();
-    
+
+    player = std::shared_ptr<Player>(new Player());
+    player->setPosition(200,200);
+
     world->createWorld();
 
     bannerImage = std::shared_ptr<sf::Sprite>(new sf::Sprite());
@@ -153,9 +159,6 @@ void Game::start()
     mainWindow->clear();
     mainWindow->draw((*bannerImage));
     forceRedraw();
-
-    player = std::shared_ptr<Player>(new Player());
-    player->setPosition(200,200);
 
     bool reactionGiven = false;
 
